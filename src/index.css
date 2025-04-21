@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-blue-100 to-indigo-200 min-h-screen;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/10 backdrop-blur-lg shadow-lg border border-white/20 rounded-xl;
+  }
+  
+  .input-glass {
+    @apply glass px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50;
+  }
+  
+  .button-glass {
+    @apply glass px-6 py-2 hover:bg-white/20 transition-colors duration-200 
+           active:scale-95 transform disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .card-glass {
+    @apply glass p-6 hover:bg-white/20 transition-colors duration-200 cursor-pointer;
+  }
+}
