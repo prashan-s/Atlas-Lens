@@ -1,106 +1,152 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { getCountryByCode } from '../services/api';
 
-function CountryPage() {
+export default function CountryPage() {
   const { code } = useParams();
   const [country, setCountry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    fetch(`https://restcountries.com/v3.1/alpha/${code}`)
-      .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        // The API returns an array, so take the first element
-        if (data && data.length > 0) {
-          setCountry(data[0]);
-        } else {
-          setCountry(null);
-        }
+    async function fetchCountry() {
+      try {
+        const [data] = await getCountryByCode(code);
+        setCountry(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch country details');
+        console.error('Error fetching country:', err);
+      } finally {
         setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch country details', err);
-        setError('Could not load country data.');
-        setLoading(false);
-      });
-  }, [code]); // Rerun effect when the country code in the URL changes
+      }
+    }
+
+    fetchCountry();
+  }, [code]);
 
   if (loading) {
-    return <p className="text-center mt-10">Loading...</p>;
-  }
-
-  if (error) {
-    return <p className="text-center mt-10 text-red-500">{error}</p>;
-  }
-
-  if (!country) {
     return (
-      <div className="text-center mt-10">
-        <p className="mb-4">Country not found.</p>
-        <Link to="/" className="text-blue-500 hover:underline">Go to Home Page</Link>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glass p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
       </div>
     );
   }
 
-  // Helper to get language names
-  const getLanguageNames = (languages) => {
-    if (!languages) return 'N/A';
-    return Object.values(languages).join(', ');
-  };
-
-  // Helper to get currency names (v3.1 returns currencies as an object)
-   const getCurrencyNames = (currencies) => {
-    if (!currencies) return 'N/A';
-    return Object.values(currencies).map(currency => currency.name).join(', ');
-  };
+  if (error || !country) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glass p-8 text-center">
+          <p className="text-red-500 mb-4">{error || 'Country not found'}</p>
+          <Link to="/" className="button-glass inline-block">
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Link to="/" className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded shadow mb-8">&larr; Back</Link>
+    <div className="min-h-screen pt-24 pb-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <Link to="/" className="button-glass inline-flex items-center mb-8">
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Back
+        </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <img src={country.flags.png} alt={`Flag of ${country.name.common}`} className="w-full h-auto object-cover" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-bold mb-4">{country.name.common}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p><span className="font-semibold">Official Name:</span> {country.name.official}</p>
-              <p><span className="font-semibold">Population:</span> {country.population.toLocaleString()}</p>
-              <p><span className="font-semibold">Region:</span> {country.region}</p>
-              <p><span className="font-semibold">Subregion:</span> {country.subregion || 'N/A'}</p>
+        <div className="glass p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="relative aspect-video">
+              <img
+                src={country.flags.png}
+                alt={`Flag of ${country.name.common}`}
+                className="w-full h-full object-cover rounded-lg"
+              />
             </div>
+
             <div>
-              <p><span className="font-semibold">Capital:</span> {country.capital?.[0] || 'N/A'}</p>
-              <p><span className="font-semibold">Top Level Domain:</span> {country.tld?.[0] || 'N/A'}</p>
-              <p><span className="font-semibold">Currencies:</span> {getCurrencyNames(country.currencies)}</p>
-              <p><span className="font-semibold">Languages:</span> {getLanguageNames(country.languages)}</p>
+              <h1 className="text-3xl font-bold text-secondary mb-8">
+                {country.name.common}
+              </h1>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <p className="text-secondary">
+                    <span className="font-medium">Official Name: </span>
+                    {country.name.official}
+                  </p>
+                  <p className="text-secondary">
+                    <span className="font-medium">Population: </span>
+                    {country.population.toLocaleString()}
+                  </p>
+                  <p className="text-secondary">
+                    <span className="font-medium">Region: </span>
+                    {country.region}
+                  </p>
+                  <p className="text-secondary">
+                    <span className="font-medium">Sub Region: </span>
+                    {country.subregion || 'N/A'}
+                  </p>
+                  <p className="text-secondary">
+                    <span className="font-medium">Capital: </span>
+                    {country.capital?.[0] || 'N/A'}
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-secondary">
+                    <span className="font-medium">Top Level Domain: </span>
+                    {country.tld?.[0] || 'N/A'}
+                  </p>
+                  <p className="text-secondary">
+                    <span className="font-medium">Currencies: </span>
+                    {Object.values(country.currencies || {})
+                      .map(currency => currency.name)
+                      .join(', ') || 'N/A'}
+                  </p>
+                  <p className="text-secondary">
+                    <span className="font-medium">Languages: </span>
+                    {Object.values(country.languages || {}).join(', ') || 'N/A'}
+                  </p>
+                </div>
+              </div>
+
+              {country.borders && country.borders.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold text-secondary mb-4">
+                    Border Countries:
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {country.borders.map(border => (
+                      <Link
+                        key={border}
+                        to={`/country/${border}`}
+                        className="button-glass text-sm"
+                      >
+                        {border}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          {country.borders && country.borders.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-2">Border Countries:</h3>
-              <div className="flex flex-wrap gap-2">
-                {country.borders.map(borderCode => (
-                  // Note: This just displays the code. To show names, you'd need to fetch border country details or look up from a cached list.
-                  <span key={borderCode} className="bg-gray-200 text-gray-800 px-3 py-1 rounded shadow text-sm">{borderCode}</span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
-
-export default CountryPage;
