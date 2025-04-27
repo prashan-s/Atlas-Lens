@@ -1,4 +1,3 @@
-// src/pages/FavoritesPage.jsx
 import { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -16,11 +15,11 @@ export default function FavoritesPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch all countries (we need this to display favorite country details)
+
         const allCountries = await getAllCountries();
         setCountries(allCountries);
 
-        // Fetch user's favorites
+
         const docRef = doc(db, 'favorites', currentUser.uid);
         console.log(currentUser.uid);
         const docSnap = await getDoc(docRef);
