@@ -7,12 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.1.2",
     "firebase": "^10.7.0",
+    "gh-pages": "^6.3.0",
     "jest": "^29.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -30,5 +33,6 @@
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
     "vite": "^5.0.0"
-  }
+  },
+  "homepage": "https://prashan-s.github.io/Atlas-Lens/"
 }
