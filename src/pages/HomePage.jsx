@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAllCountries, getCountriesByCurrency, getCountriesByLanguage } from '../services/api';
 import SearchBar from '../components/UI/SearchBar';
 import CountryCard from '../components/Country/CountryCard';
@@ -6,7 +6,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../context/AuthContext';
 
-export default function HomePage() {
+export default function HomePage({ onSearch: externalOnSearch, onSearchRef }) {
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -73,7 +73,7 @@ export default function HomePage() {
     }
   }
 
-  async function handleSearch(query, type = 'name') {
+  const handleSearch = externalOnSearch || (async (query, type = 'name') => {
     setSearchQuery(query);
     setSearchType(type);
     if (!query) {
@@ -119,7 +119,16 @@ export default function HomePage() {
       }
     }
     setFilteredCountries(results);
-  }
+  });
+
+  useEffect(() => {
+    if (onSearchRef) {
+      onSearchRef.current = handleSearch;
+      return () => {
+        onSearchRef.current = null;
+      };
+    }
+  }, [onSearchRef, handleSearch]);
 
   const regions = [...new Set(countries.map(country => country.region))];
   const subregions = selectedRegion
@@ -161,7 +170,6 @@ export default function HomePage() {
 
       </div>
       <div className="mb-8 space-y-4">
-        <SearchBar onSearch={handleSearch} />
         <div className="flex flex-wrap gap-4">
           <select
             value={selectedRegion}
