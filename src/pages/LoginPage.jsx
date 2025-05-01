@@ -75,13 +75,6 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="input-glass w-full py-3 px-4 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
             />
-            <div className="text-right mt-1">
-              {isLogin && (
-                <button type="button" className="text-xs text-primary hover:underline focus:outline-none">
-                  Forgot Password?
-                </button>
-              )}
-            </div>
           </div>
 
           <button
