@@ -135,7 +135,7 @@ export default function FavoritesPage({ onSearchRef }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-      <h1 className="text-3xl p-font-bold text-secondary mb-8">Your Favorite Countries</h1>
+      <h1 className="text-3xl font-bold text-secondary mb-8 mt-10">Your Favorite Countries</h1>
       {filteredCountries.length === 0 ? (
         <div className="glass p-8 text-center">
           <p className="text-secondary mb-4">You haven't added any countries to your favorites yet.</p>
