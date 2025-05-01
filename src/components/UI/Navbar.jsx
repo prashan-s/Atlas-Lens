@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
 import SearchBar from './SearchBar';
 
 export default function Navbar({ onSearch }) {
   const { currentUser, logout } = useAuth();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -14,6 +15,12 @@ export default function Navbar({ onSearch }) {
       console.error('Failed to log out:', error);
     }
   };
+
+  // Hide SearchBar on /country/*, /login, and /notfound
+  const hideSearchBar =
+    location.pathname.startsWith('/country') ||
+    location.pathname.startsWith('/login') ||
+    location.pathname.startsWith('/notfound');
 
   return (
     <nav className="glass fixed top-0 left-0 right-0 z-50 mx-4 mt-4">
@@ -25,7 +32,7 @@ export default function Navbar({ onSearch }) {
 
           <div className="flex-1 flex justify-center">
             <div className="w-full max-w-2xl">
-              <SearchBar onSearch={onSearch} />
+              {!hideSearchBar && <SearchBar onSearch={onSearch} />}
             </div>
           </div>
 
