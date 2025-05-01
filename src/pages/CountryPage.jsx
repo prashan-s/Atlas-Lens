@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCountryByCode } from '../services/api';
+import { getCountryByCode, getCountriesByCodes } from '../services/api';
 
 export default function CountryPage() {
   const { code } = useParams();
   const [country, setCountry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [borderCountries, setBorderCountries] = useState([]);
+  const [borderLoading, setBorderLoading] = useState(false);
 
   useEffect(() => {
     async function fetchCountry() {
@@ -21,9 +23,27 @@ export default function CountryPage() {
         setLoading(false);
       }
     }
-
     fetchCountry();
   }, [code]);
+
+  useEffect(() => {
+    async function fetchBorders() {
+      if (!country || !country.borders || country.borders.length === 0) {
+        setBorderCountries([]);
+        return;
+      }
+      setBorderLoading(true);
+      try {
+        const data = await getCountriesByCodes(country.borders);
+        setBorderCountries(data);
+      } catch (err) {
+        setBorderCountries([]);
+      } finally {
+        setBorderLoading(false);
+      }
+    }
+    fetchBorders();
+  }, [country]);
 
   if (loading) {
     return (
@@ -130,16 +150,62 @@ export default function CountryPage() {
                   <h2 className="text-xl font-semibold text-secondary mb-4">
                     Border Countries:
                   </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {country.borders.map(border => (
-                      <Link
-                        key={border}
-                        to={`/country/${border}`}
-                        className="button-glass text-sm"
-                      >
-                        {border}
-                      </Link>
-                    ))}
+                  <div className="flex flex-row flex-wrap gap-4">
+                    {(borderLoading || borderCountries.length < country.borders.length)
+                      ? country.borders.map((border, idx) => {
+                          const borderCountry = borderCountries.find(c => c.cca3 === border);
+                          return borderCountry ? (
+                            <Link
+                              key={border}
+                              to={`/country/${border}`}
+                              className="block min-w-[140px] max-w-[180px] border border-primary/20 rounded-lg p-2 bg-white/60 shadow hover:shadow-md transition"
+                            >
+                              <div className="flex flex-col items-center">
+                                <img
+                                  src={borderCountry.flags.png}
+                                  alt={`Flag of ${borderCountry.name.common}`}
+                                  className="w-12 h-8 object-cover rounded mb-2"
+                                />
+                                <div className="text-xs font-semibold text-secondary text-center">
+                                  {borderCountry.name.common}
+                                </div>
+                                <div className="text-[10px] text-secondary/70 text-center">
+                                  Pop: {borderCountry.population.toLocaleString()}
+                                </div>
+                              </div>
+                            </Link>
+                          ) : (
+                            <div
+                              key={border}
+                              className="block min-w-[140px] max-w-[180px] border border-primary/20 rounded-lg p-2 bg-white/60 shadow animate-pulse flex flex-col items-center justify-center"
+                            >
+                              <div className="w-12 h-8 bg-gray-300 rounded mb-2 shimmer" />
+                              <div className="h-4 w-20 bg-gray-300 rounded mb-1 shimmer" />
+                              <div className="h-3 w-16 bg-gray-200 rounded shimmer" />
+                            </div>
+                          );
+                        })
+                      : borderCountries.map(borderCountry => (
+                          <Link
+                            key={borderCountry.cca3}
+                            to={`/country/${borderCountry.cca3}`}
+                            className="block min-w-[140px] max-w-[180px] border border-primary/20 rounded-lg p-2 bg-white/60 shadow hover:shadow-md transition"
+                          >
+                            <div className="flex flex-col items-center">
+                              <img
+                                src={borderCountry.flags.png}
+                                alt={`Flag of ${borderCountry.name.common}`}
+                                className="w-12 h-8 object-cover rounded mb-2"
+                              />
+                              <div className="text-xs font-semibold text-secondary text-center">
+                                {borderCountry.name.common}
+                              </div>
+                              <div className="text-[10px] text-secondary/70 text-center">
+                                Pop: {borderCountry.population.toLocaleString()}
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
                   </div>
                 </div>
               )}
@@ -150,3 +216,21 @@ export default function CountryPage() {
     </div>
   );
 }
+
+<style>{`
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+    animation: shimmer 1.2s infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+`}</style>

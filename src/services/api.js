@@ -37,4 +37,12 @@ export async function getCountriesByLanguage(language) {
   const response = await fetch(`${BASE_URL}/lang/${language}`);
   if (!response.ok) throw new Error('Failed to fetch countries by language');
   return response.json();
+}
+
+export async function getCountriesByCodes(codes) {
+  // codes: array of country codes (e.g., ["FRA", "DEU"])
+  const joined = codes.join(",");
+  const response = await fetch(`${BASE_URL}/alpha?codes=${joined}`);
+  if (!response.ok) throw new Error('Failed to fetch countries by codes');
+  return response.json();
 } 
