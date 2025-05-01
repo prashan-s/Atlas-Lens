@@ -12,6 +12,7 @@ export default function HomePage() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedSubregion, setSelectedSubregion] = useState('');
   const [favorites, setFavorites] = useState([]);
   const { currentUser } = useAuth();
 
@@ -66,13 +67,17 @@ export default function HomePage() {
     }
   }
 
+  const regions = [...new Set(countries.map(country => country.region))];
+  const subregions = selectedRegion
+    ? [...new Set(countries.filter(c => c.region === selectedRegion).map(c => c.subregion).filter(Boolean))]
+    : [...new Set(countries.map(c => c.subregion).filter(Boolean))];
+
   const filteredCountries = countries.filter(country => {
     const matchesSearch = country.name.common.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRegion = !selectedRegion || country.region === selectedRegion;
-    return matchesSearch && matchesRegion;
+    const matchesSubregion = !selectedSubregion || country.subregion === selectedSubregion;
+    return matchesSearch && matchesRegion && matchesSubregion;
   });
-
-  const regions = [...new Set(countries.map(country => country.region))];
 
   if (loading) {
     return (
@@ -101,19 +106,35 @@ export default function HomePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
       <div className="mb-8 space-y-4">
         <SearchBar onSearch={setSearchQuery} />
-        
-        <select
-          value={selectedRegion}
-          onChange={(e) => setSelectedRegion(e.target.value)}
-          className="input-glass"
-        >
-          <option value="">All Regions</option>
-          {regions.map(region => (
-            <option key={region} value={region}>
-              {region}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-wrap gap-4">
+          <select
+            value={selectedRegion}
+            onChange={(e) => {
+              setSelectedRegion(e.target.value);
+              setSelectedSubregion('');
+            }}
+            className="input-glass"
+          >
+            <option value="">All Regions</option>
+            {regions.map(region => (
+              <option key={region} value={region}>
+                {region}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedSubregion}
+            onChange={(e) => setSelectedSubregion(e.target.value)}
+            className="input-glass"
+          >
+            <option value="">All Subregions</option>
+            {subregions.map(subregion => (
+              <option key={subregion} value={subregion}>
+                {subregion}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

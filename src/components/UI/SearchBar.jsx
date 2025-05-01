@@ -1,7 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SearchBar({ onSearch }) {
   const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onSearch(query);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [query, onSearch]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -16,7 +23,7 @@ export default function SearchBar({ onSearch }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for a country..."
-          className="input-glass w-full pl-12 pr-4 py-3"
+          className="input-glass w-full pl-12 pr-4 py-3 animate-fadein"
         />
         <svg
           className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary"
