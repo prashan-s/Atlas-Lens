@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllCountries, getCountriesByCurrency } from '../services/api';
+import { getAllCountries, getCountriesByCurrency, getCountriesByLanguage } from '../services/api';
 import SearchBar from '../components/UI/SearchBar';
 import CountryCard from '../components/Country/CountryCard';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -91,7 +91,6 @@ export default function HomePage() {
         c.cca2.toLowerCase() === query.toLowerCase()
       );
     } else if (type === 'currency') {
-      // Try to filter from cached data first
       results = countries.filter(c =>
         c.currencies && Object.entries(c.currencies).some(
           ([code, curr]) =>
@@ -100,13 +99,23 @@ export default function HomePage() {
             (curr.symbol && curr.symbol.toLowerCase() === query.toLowerCase())
         )
       );
-      // If not found, fallback to API
       if (results.length === 0) {
         try {
           results = await getCountriesByCurrency(query);
-        } catch (err) {
-          // ignore error, will show no results
-        }
+        } catch (err) {}
+      }
+    } else if (type === 'language') {
+      results = countries.filter(c =>
+        c.languages && Object.entries(c.languages).some(
+          ([code, lang]) =>
+            code.toLowerCase() === query.toLowerCase() ||
+            lang.toLowerCase().includes(query.toLowerCase())
+        )
+      );
+      if (results.length === 0) {
+        try {
+          results = await getCountriesByLanguage(query);
+        } catch (err) {}
       }
     }
     setFilteredCountries(results);
@@ -147,7 +156,10 @@ export default function HomePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+      <div className="mb-10 text-center">
+
+      </div>
       <div className="mb-8 space-y-4">
         <SearchBar onSearch={handleSearch} />
         <div className="flex flex-wrap gap-4">

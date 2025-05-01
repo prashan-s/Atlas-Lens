@@ -31,4 +31,10 @@ export async function getCountriesByCurrency(currency) {
   const response = await fetch(`${BASE_URL}/currency/${currency}`);
   if (!response.ok) throw new Error('Failed to fetch countries by currency');
   return response.json();
+}
+
+export async function getCountriesByLanguage(language) {
+  const response = await fetch(`${BASE_URL}/lang/${language}`);
+  if (!response.ok) throw new Error('Failed to fetch countries by language');
+  return response.json();
 } 

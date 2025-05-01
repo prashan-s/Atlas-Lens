@@ -27,6 +27,7 @@ export default function SearchBar({ onSearch }) {
           <option value="name">Name</option>
           <option value="code">Country Code</option>
           <option value="currency">Currency</option>
+          <option value="language">Language</option>
         </select>
         <div className="relative w-full">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary">
